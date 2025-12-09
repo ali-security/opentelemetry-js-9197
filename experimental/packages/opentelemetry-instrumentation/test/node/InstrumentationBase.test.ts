@@ -288,6 +288,53 @@ describe('InstrumentationBase', () => {
     });
   });
 
+  describe('module name validation', () => {
+    it('should reject module names with backticks', () => {
+      class MaliciousInstrumentation extends InstrumentationBase {
+        constructor() {
+          super('test', '1.0.0', { enabled: false });
+        }
+        init() {
+          return [
+            new InstrumentationNodeModuleDefinition('malicious`module', ['*']),
+          ];
+        }
+      }
+      const instrumentation = new MaliciousInstrumentation();
+      assert.throws(() => instrumentation.enable(), /invalid characters/);
+    });
+
+    it('should reject module names with template expressions', () => {
+      class MaliciousInstrumentation extends InstrumentationBase {
+        constructor() {
+          super('test', '1.0.0', { enabled: false });
+        }
+        init() {
+          return [
+            new InstrumentationNodeModuleDefinition('malicious${expr}', ['*']),
+          ];
+        }
+      }
+      const instrumentation = new MaliciousInstrumentation();
+      assert.throws(() => instrumentation.enable(), /invalid characters/);
+    });
+
+    it('should allow valid module names', () => {
+      class ValidInstrumentation extends InstrumentationBase {
+        constructor() {
+          super('test', '1.0.0', { enabled: false });
+        }
+        init() {
+          return [
+            new InstrumentationNodeModuleDefinition('@scope/valid-module', ['*']),
+          ];
+        }
+      }
+      const instrumentation = new ValidInstrumentation();
+      assert.doesNotThrow(() => instrumentation.enable());
+    });
+  });
+
   describe('enable/disable', () => {
     describe('AND a normal module name', () => {
       type Exports = Record<string, unknown>;

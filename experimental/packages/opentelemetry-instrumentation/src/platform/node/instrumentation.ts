@@ -31,6 +31,15 @@ import { diag } from '@opentelemetry/api';
 import type { OnRequireFn } from 'require-in-the-middle';
 import { Hook } from 'require-in-the-middle';
 
+function validateModuleName(name: string): string {
+  if (/[`]|\$\{/.test(name)) {
+    throw new Error(
+      `Module name "${name}" contains invalid characters that could enable code injection`
+    );
+  }
+  return name;
+}
+
 /**
  * Base abstract class for instrumenting node plugins
  */
@@ -268,7 +277,7 @@ export abstract class InstrumentationBase<T = any>
       this._hooks.push(hook);
       const esmHook =
         new (ImportInTheMiddle as unknown as typeof ImportInTheMiddle.default)(
-          [module.name],
+          [validateModuleName(module.name)],
           { internals: false },
           <HookFn>hookFn
         );
