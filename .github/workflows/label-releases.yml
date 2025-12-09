@@ -6,7 +6,7 @@ on:
 jobs:
   label-release:
     if: ${{ startsWith(github.event.pull_request.title, 'release:') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - run: echo this is a release PR
       - run: gh pr edit ${{ github.event.pull_request.number }} --add-label release

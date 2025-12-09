@@ -7,9 +7,10 @@ on:
   pull_request:
   merge_group:
 
+      - master
 jobs:
   peer-api-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
       image: node:20
     steps:
